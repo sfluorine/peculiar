@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "texture.h"
 
 namespace peculiar
 {
@@ -15,6 +15,9 @@ void begin_drawing();
 void end_drawing();
 
 void draw_quad(glm::vec2 position, glm::vec2 dimension, glm::vec3 color);
+void draw_quad(glm::vec2 position,
+               glm::vec2 dimension,
+               const ref_ptr_t<texture_t>& texture);
 
 }
 

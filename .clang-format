@@ -54,7 +54,7 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: false
 SpaceInEmptyParentheses: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
-
+CommentPragmas: 'IWYU pragma: keep'
 IncludeCategories:
   - Regex: '^<glad/.*>'
     Priority: 1

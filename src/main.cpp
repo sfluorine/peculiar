@@ -25,6 +25,10 @@ int main()
     glm::vec2 velocity(250.0f, 250.0f);
     glm::vec2 dimension(50.0f);
 
+    auto poland = peculiar::texture_t::load_from_file("resources/poland.png");
+    auto swastika
+        = peculiar::texture_t::load_from_file("resources/swastika.png");
+
     float last_time = 0;
     while (!glfwWindowShouldClose(window)) {
         float current_time = static_cast<float>(glfwGetTime());
@@ -44,9 +48,16 @@ int main()
         }
 
         renderer2d::begin_drawing();
+        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderer2d::draw_quad(position, dimension, glm::vec3(1.0, 0.0, 0.0));
+        renderer2d::draw_quad(position + glm::vec2(-80), dimension, swastika);
+        renderer2d::draw_quad(
+            position + glm::vec2(-80, 80), dimension, swastika);
+        renderer2d::draw_quad(position, dimension, poland);
+        renderer2d::draw_quad(
+            position + glm::vec2(80, -80), dimension, swastika);
+        renderer2d::draw_quad(position + glm::vec2(80), dimension, swastika);
 
         renderer2d::end_drawing();
 

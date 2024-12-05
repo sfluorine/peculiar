@@ -6,6 +6,8 @@ namespace peculiar
 basic_shader_t::basic_shader_t(uint32_t id)
     : m_id(id)
 {
+    bind();
+
     int32_t textures[32];
     for (int32_t i = 0; i < 32; i++)
         textures[i] = i;
@@ -73,7 +75,7 @@ ref_ptr_t<basic_shader_t> basic_shader_t::init()
 
     out vec2 v_uv;
     out vec3 v_col;
-    flat out uint v_tex_index;
+    out flat uint v_tex_index;
 
     void main()
     {
@@ -94,11 +96,15 @@ ref_ptr_t<basic_shader_t> basic_shader_t::init()
 
     in vec2 v_uv;
     in vec3 v_col;
-    flat in uint v_tex_index;
+    in flat uint v_tex_index;
 
     void main()
     {
-        FragColor = texture(u_textures[v_tex_index], v_uv) * vec4(v_col, 1.0);
+        vec4 tex_color = texture(u_textures[v_tex_index], v_uv);
+        if (tex_color.a < 0.1)
+            discard;
+
+        FragColor = tex_color;
     }
     )";
 

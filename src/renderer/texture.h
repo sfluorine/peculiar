@@ -19,6 +19,7 @@ public:
 
 public:
     static ref_ptr_t<texture_t> load_white_texture();
+    static ref_ptr_t<texture_t> load_from_file(const fs::path& path);
 
 private:
     uint32_t m_id;

@@ -31,6 +31,14 @@ target_link_libraries(
     PECULIAR PRIVATE
     glad
     glfw
-    spdlog
     glm::glm
+    spdlog
+    stb_image
+)
+
+add_custom_target(copy_data
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different 
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+        "${CMAKE_CURRENT_BINARY_DIR}/resources"
+    COMMENT "Copying data"
 )

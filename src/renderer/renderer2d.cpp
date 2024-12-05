@@ -36,9 +36,10 @@ struct renderer_data_t {
     quad_vertex_t* quad_vertices_ptr { nullptr };
 
     vector_t<ref_ptr_t<texture_t>> textures;
+    map_t<ref_ptr_t<texture_t>, uint32_t> texture_map;
 
-    uint32_t texture_count { 1 }; // 1 because there's a white texture.
     uint32_t quad_index_count { 0 };
+    uint32_t texture_count { 1 }; // 1 because there's a white texture.
 };
 
 static renderer_data_t g_render_data {};
@@ -107,7 +108,11 @@ void init(int32_t width, int32_t height)
     init_shader_and_buffer_objects(width, height);
     init_vertices();
 
-    g_render_data.textures.push_back(texture_t::load_white_texture());
+    auto white_texture = texture_t::load_white_texture();
+
+    g_render_data.textures.push_back(white_texture);
+    g_render_data.texture_map[white_texture] = 0;
+
     g_render_data.initialized = true;
 }
 
@@ -131,6 +136,8 @@ void begin_drawing()
 {
     g_render_data.quad_index_count = 0;
     g_render_data.quad_vertices_ptr = g_render_data.quad_vertices;
+
+    g_render_data.texture_count = 1;
 }
 
 void end_drawing()
@@ -142,7 +149,6 @@ void end_drawing()
         auto size
             = (g_render_data.quad_vertices_ptr - g_render_data.quad_vertices)
             * sizeof(quad_vertex_t);
-
         g_render_data.quad_vbo->set_data(size, g_render_data.quad_vertices);
 
         g_render_data.shader->bind();
@@ -193,6 +199,59 @@ void draw_quad(glm::vec2 position, glm::vec2 dimension, glm::vec3 color)
     g_render_data.quad_vertices_ptr->uv = glm::vec2(1.0, 1.0);
     g_render_data.quad_vertices_ptr->color = color;
     g_render_data.quad_vertices_ptr->tex_index = 0;
+    g_render_data.quad_vertices_ptr++;
+
+    g_render_data.quad_index_count += 6;
+}
+
+void draw_quad(glm::vec2 position,
+               glm::vec2 dimension,
+               const ref_ptr_t<texture_t>& texture)
+{
+    if (!g_render_data.initialized)
+        return;
+
+    if (g_render_data.quad_index_count >= MAX_QUAD_INDICES
+        || g_render_data.texture_count >= MAX_TEXTURES) {
+        end_drawing();
+        begin_drawing();
+    }
+
+    uint32_t texture_index = 0;
+    if (g_render_data.texture_map.contains(texture)) {
+        texture_index = g_render_data.texture_map[texture];
+    } else {
+        g_render_data.textures.push_back(texture);
+        g_render_data.texture_map[texture] = g_render_data.texture_count;
+        texture_index = g_render_data.texture_count++;
+    }
+
+    g_render_data.quad_vertices_ptr->position
+        = glm::vec3(position.x, position.y, 0.0);
+    g_render_data.quad_vertices_ptr->uv = glm::vec2(0.0, 1.0);
+    g_render_data.quad_vertices_ptr->color = glm::vec3(0.0f);
+    g_render_data.quad_vertices_ptr->tex_index = texture_index;
+    g_render_data.quad_vertices_ptr++;
+
+    g_render_data.quad_vertices_ptr->position
+        = glm::vec3(position.x, position.y + dimension.y, 0.0);
+    g_render_data.quad_vertices_ptr->uv = glm::vec2(0.0, 0.0);
+    g_render_data.quad_vertices_ptr->color = glm::vec3(0.0f);
+    g_render_data.quad_vertices_ptr->tex_index = texture_index;
+    g_render_data.quad_vertices_ptr++;
+
+    g_render_data.quad_vertices_ptr->position
+        = glm::vec3(position.x + dimension.x, position.y + dimension.y, 0.0);
+    g_render_data.quad_vertices_ptr->uv = glm::vec2(1.0, 0.0);
+    g_render_data.quad_vertices_ptr->color = glm::vec3(0.0f);
+    g_render_data.quad_vertices_ptr->tex_index = texture_index;
+    g_render_data.quad_vertices_ptr++;
+
+    g_render_data.quad_vertices_ptr->position
+        = glm::vec3(position.x + dimension.x, position.y, 0.0);
+    g_render_data.quad_vertices_ptr->uv = glm::vec2(1.0, 1.0);
+    g_render_data.quad_vertices_ptr->color = glm::vec3(0.0f);
+    g_render_data.quad_vertices_ptr->tex_index = texture_index;
     g_render_data.quad_vertices_ptr++;
 
     g_render_data.quad_index_count += 6;
